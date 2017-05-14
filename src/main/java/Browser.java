@@ -114,7 +114,7 @@ public class Browser {
             webDriver.findElement(locator).click();
             return true;
         } catch (WebDriverException e) {
-            System.out.println(e.getMessage());
+            System.out.println(e.getMessage() + locator.toString());
             return false;
         }
     }
@@ -178,5 +178,21 @@ public class Browser {
             return false;
         }
         return true;
+    }
+
+    public WebElement getElement(By locator){
+        return webDriver.findElement(locator);
+    }
+
+    public WebElement getElementWithText(String text){
+        return getElement(By.xpath("//*[text()='"+text+"']"));
+    }
+
+    public void closeCockieIfExist() {
+      if (getElement(By.className("cookie-policy")).isDisplayed()) {
+          clickElement(By.className("cookie-ok"));
+          waitUntilDisappear(By.className("cookie-policy"),5);
+          waitForJQueryEnds();
+      }
     }
 }
