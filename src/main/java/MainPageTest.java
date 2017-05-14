@@ -103,13 +103,45 @@ public class MainPageTest {
     }
 
     @Test
-    public void checkChangingLanguage(){
+    public void checkChangingLanguageEnglish(){
         Assert.assertTrue(browser.changeLanguage("English"));
         browser.waitForJQueryEnds();
         Assert.assertTrue(browser.getChosenLanguage().equals("English"),browser.getChosenLanguage());
-        Assert.assertTrue(browser.chooseTopLineElement("Game"));
-        Assert.assertTrue(browser.changeLanguage("Русский"));
-        Assert.assertTrue(browser.getChosenLanguage().equals("Русский"));
+    }
+
+    @Test
+    public void checkChangingLanguageChina(){
+        Assert.assertTrue(browser.changeLanguage("中文"));
+        browser.waitForJQueryEnds();
+        Assert.assertTrue(browser.getChosenLanguage().equals("中文"),browser.getChosenLanguage());
+    }
+
+    @Test
+    public void checkChangingLanguageSpanish(){
+        Assert.assertTrue(browser.changeLanguage("Español"));
+        browser.waitForJQueryEnds();
+        Assert.assertTrue(browser.getChosenLanguage().equals("Español"),browser.getChosenLanguage());
+    }
+
+    @Test
+    public void checkChangingLanguagePoland(){
+        Assert.assertTrue(browser.changeLanguage("Polski"));
+        browser.waitForJQueryEnds();
+        Assert.assertTrue(browser.getChosenLanguage().equals("Polski"),browser.getChosenLanguage());
+    }
+
+    @Test
+    public void checkChangingLanguagePortugues(){
+        Assert.assertTrue(browser.changeLanguage("Português"));
+        browser.waitForJQueryEnds();
+        Assert.assertTrue(browser.getChosenLanguage().equals("Português"),browser.getChosenLanguage());
+    }
+
+    @Test
+    public void checkChangingLanguageDeutch(){
+        Assert.assertTrue(browser.changeLanguage("Deutsch"));
+        browser.waitForJQueryEnds();
+        Assert.assertTrue(browser.getChosenLanguage().equals("Deutsch"),browser.getChosenLanguage());
     }
 
     @Test
