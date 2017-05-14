@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="1 class">
+
+    <test verbose="1" name="testing main page" annotations="JDK">
+        <classes>
+            <class name="MainPageTest"/>
+        </classes>
+    </test>
+
+</suite>
