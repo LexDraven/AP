@@ -17,12 +17,32 @@ public class Browser {
     private int timeToWait = 3;
     private String mainPageUrl;
 
+    public By mainLogo = By.cssSelector(".main-header__logo");
+    public By playButton = By.id("fightActive");
+    public By newsBlockFirstTitle = By.cssSelector(".news-block__block .title");
+    public By newsBlockNextButton = By.cssSelector(".news-block__buttons>.news-block__button.next");
+    public By newsBlockPrevButton = By.cssSelector(".news-block__buttons>.news-block__button.prev");
+    public By cookiePanel = By.className("cookie-policy");
+    public By cookieOkButton = By.className("cookie-ok");
+    public By textBlock = By.xpath("//p");
+    public By videoBlockNextButton = By.cssSelector(".video-block__buttons>.video-block__button.next");
+    public By videoBlockPrevButton = By.cssSelector(".video-block__buttons>.video-block__button.prev");
+    public By videoBlock = By.cssSelector("iframe[class^=video-block__youtube-container]");
+
+    public By getElementByText(String title) {
+        return By.xpath("//*[text()='"+title+"']");
+    }
+
+    public By iframeWithVideo(String linkOnVideo) {
+        return By.xpath("//iframe[@src='"+linkOnVideo+"']");
+    }
+
     public Browser(String mainPageUrl) {
         this.mainPageUrl = mainPageUrl;
         init();
     }
 
-    private void init(){
+    private void init() {
         System.setProperty("webdriver.chrome.driver", System.getProperty("user.dir") + "/vendors/chromedriver.exe");
         webDriver = new ChromeDriver();
         webDriver.manage().timeouts().implicitlyWait(timeToWait, TimeUnit.SECONDS);
@@ -30,11 +50,13 @@ public class Browser {
     }
 
     public void waitForJQueryEnds() {
-        while ((Boolean) ((JavascriptExecutor) webDriver).executeScript("return jQuery.active!=0"));
+            while ((Boolean) ((JavascriptExecutor) webDriver).executeScript("return jQuery.active!=0"));
     }
 
     public boolean isJQueryOnThisPage() {
-        return ((JavascriptExecutor) webDriver).executeScript("return (window.jQuery)") != null;
+        JavascriptExecutor executor = (JavascriptExecutor) webDriver;
+        Object result = executor.executeScript("return (window.jQuery)");
+        return result != null;
     }
 
     protected void goToURL(String url) {
@@ -49,64 +71,48 @@ public class Browser {
         return listok.size() > 0;
     }
 
-    public void quit(){
+    public void quit() {
         webDriver.quit();
     }
 
-    protected void pause() {
-        pause(0);
-    }
-
-    protected void pause(int timeInSeconds) {
-        try {
-            if (timeInSeconds > 0) {
-                Thread.sleep(timeInSeconds * 1000);
-            } else {
-                Thread.sleep(250);
-            }
-        } catch (InterruptedException e) {
-
-        }
-    }
-
-    private  boolean isLinkAlive (String URL){
+    private boolean isLinkAlive(String URL) {
         HttpResponse response;
         try {
-            RequestConfig config= RequestConfig.custom().setCookieSpec(CookieSpecs.IGNORE_COOKIES).setSocketTimeout(15000).setConnectTimeout(10000).setConnectionRequestTimeout(10000).build();
-            HttpClient client= HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+            RequestConfig config = RequestConfig.custom().setCookieSpec(CookieSpecs.IGNORE_COOKIES).setSocketTimeout(15000).setConnectTimeout(10000).setConnectionRequestTimeout(10000).build();
+            HttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
             HttpGet request = new HttpGet(URL);
             response = client.execute(request);
         } catch (Exception e) {
             System.err.println(URL + " error " + e.getLocalizedMessage());
             return false;
         }
-        return  response.getStatusLine().getStatusCode()==200;
+        return response.getStatusLine().getStatusCode() == 200;
     }
 
-    public boolean allLinksOnPageAlive(){
+    public boolean allLinksOnPageAlive() {
         List<WebElement> list = webDriver.findElements(By.tagName("a"));
-        boolean result=true;
-        for(WebElement webElement:list){
+        boolean result = true;
+        for (WebElement webElement : list) {
             String url = webElement.getAttribute("href");
-            if (!url.startsWith("http")){
-               url=mainPageUrl+url;
+            if (!url.startsWith("http")) {
+                url = mainPageUrl + url;
             }
             if (!isLinkAlive(url)) {
-                System.out.println("Failed link: "+url);
+                System.out.println("Failed link: " + url);
                 result = false;
             }
         }
         return result;
     }
 
-    public boolean chooseTopLineElement(String name){
+    public boolean chooseTopLineElement(String name) {
         if (!isElementPresent(By.className("top-line__nav"))) {
             return false;
         }
-        if (!isElementPresent(By.xpath("//a[contains(.,'"+name+"')]"))) {
+        if (!isElementPresent(By.xpath("//a[contains(.,'" + name + "')]"))) {
             return false;
         }
-        return clickElement(By.xpath("//a[contains(.,'"+name+"')]"));
+        return clickElement(By.xpath("//a[contains(.,'" + name + "')]"));
     }
 
     protected boolean clickElement(By locator) {
@@ -119,27 +125,27 @@ public class Browser {
         }
     }
 
-    public String getCurrentUrl(){
+    public String getCurrentUrl() {
         return webDriver.getCurrentUrl();
     }
 
-    public boolean changeLanguage (String newLanguage){
-        if (getChosenLanguage().equals(newLanguage)){
+    public boolean changeLanguage(String newLanguage) {
+        if (getChosenLanguage().equals(newLanguage)) {
             return true;
         }
-        waitUntilVisible(By.cssSelector(".custom-select__active"),5);
+        waitUntilVisible(By.cssSelector(".custom-select__active"), 5);
         if (!clickElement(By.cssSelector(".custom-select__active"))) {
             return false;
         }
-        clickElement(By.xpath("//span[text()='"+newLanguage+"']/parent::div"));
-        return waitUntilDisappear(By.cssSelector("custom-select__options"),5);
+        clickElement(By.xpath("//span[text()='" + newLanguage + "']/parent::div"));
+        return waitUntilDisappear(By.cssSelector("custom-select__options"), 5);
     }
 
-    public String getChosenLanguage(){
-        if (!isElementPresent(By.cssSelector(".custom-select__active"))){
+    public String getChosenLanguage() {
+        if (!isElementPresent(By.cssSelector(".custom-select__active"))) {
             return "no language menu";
         }
-        String text =(String) ((JavascriptExecutor)webDriver).executeScript("return document.querySelector('.custom-select__active .text').innerText");
+        String text = (String) ((JavascriptExecutor) webDriver).executeScript("return document.querySelector('.custom-select__active .text').innerText");
         return text;
     }
 
@@ -180,19 +186,59 @@ public class Browser {
         return true;
     }
 
-    public WebElement getElement(By locator){
+    public WebElement getElement(By locator) {
         return webDriver.findElement(locator);
     }
 
-    public WebElement getElementWithText(String text){
-        return getElement(By.xpath("//*[text()='"+text+"']"));
+    public WebElement getElementWithText(String text) {
+        return getElement(By.xpath("//*[text()='" + text + "']"));
     }
 
     public void closeCockieIfExist() {
-      if (getElement(By.className("cookie-policy")).isDisplayed()) {
-          clickElement(By.className("cookie-ok"));
-          waitUntilDisappear(By.className("cookie-policy"),5);
-          waitForJQueryEnds();
-      }
+        if (getElement(By.className("cookie-policy")).isDisplayed()) {
+            clickElement(By.className("cookie-ok"));
+            waitUntilDisappear(By.className("cookie-policy"), 5);
+            waitForJQueryEnds();
+        }
+    }
+
+    public boolean clickMainLogo() {
+        return clickElement(mainLogo);
+    }
+
+    public boolean clickPlayButton() {
+        return clickElement(playButton);
+    }
+
+    public boolean clickNewsBlockNext() {
+        return clickElement(newsBlockNextButton);
+    }
+
+    public boolean clickNewsBlockPrev() {
+        return clickElement(newsBlockPrevButton);
+    }
+
+    public boolean clickVideoBlockNext() {
+        return clickElement(videoBlockNextButton);
+    }
+
+    public boolean clickVideoBlockPrev() {
+        return clickElement(videoBlockPrevButton);
+    }
+
+    public boolean clickCookieLink() {
+        return clickElement(By.cssSelector(".cookie-policy a"));
+    }
+
+    public boolean clickCookieOkButton() {
+        return clickElement(cookieOkButton);
+    }
+
+    public boolean waitForPlayButtonClickable() {
+        return waitUntilClickable(playButton,5);
+    }
+
+    public boolean waitForText() {
+        return waitUntilExist(textBlock,5);
     }
 }
