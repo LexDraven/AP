@@ -9,6 +9,25 @@ public class MainPageTest {
     private Browser browser;
     private final String mainPageUrl="http://tankionline.com/ru/";
     private final String firstPageToSkipFlashUrl="http://tankionline.com/battle-ru.html#/server=RU19";
+    private By mainLogo = By.cssSelector(".main-header__logo");
+    private By playButton = By.id("fightActive");
+    private By newsBlockFirstTitle = By.cssSelector(".news-block__block .title");
+    private By newBlockNextButton = By.cssSelector(".news-block__buttons>.news-block__button.next");
+    private By newsBlockPrevButton = By.cssSelector(".news-block__buttons>.news-block__button.prev");
+    private By cookiePanel = By.className("cookie-policy");
+    private By cookieOkButton = By.className("cookie-ok");
+    private By textBlock = By.xpath("//p");
+    private By videoBlockNextButton = By.cssSelector(".video-block__buttons>.video-block__button.next");
+    private By videoBlockPrevButton = By.cssSelector(".video-block__buttons>.video-block__button.prev");
+    private By videoBlock = By.cssSelector("iframe[class^=video-block__youtube-container]");
+
+    private By getElementByText(String title) {
+        return By.xpath("//*[text()='"+title+"']");
+    }
+
+    private By iframeWithVideo(String linkOnVideo) {
+        return By.xpath("//iframe[@src='"+linkOnVideo+"']");
+    }
 
     @BeforeSuite
     public void setUp() throws Exception {
@@ -69,37 +88,37 @@ public class MainPageTest {
 
     @Test
     public void clickMainLogoLeadToMainPage(){
-        Assert.assertTrue(browser.clickElement(By.cssSelector(".main-header__logo")));
+        Assert.assertTrue(browser.clickElement(mainLogo));
         browser.waitForJQueryEnds();
         Assert.assertTrue(browser.getCurrentUrl().equals(mainPageUrl));
     }
 
     @Test
     public void clickPlayButton(){
-        Assert.assertTrue(browser.clickElement(By.id("fightActive")));
+        Assert.assertTrue(browser.clickElement(playButton));
         browser.waitForJQueryEnds();
         Assert.assertTrue(browser.getCurrentUrl().equals("http://tankionline.com/battle-ru.html"));
     }
 
     @Test
     public void clickNextAndPreviousInNewsBlock(){
-        String titleOfFirstNews = browser.getElement(By.cssSelector(".news-block__block .title")).getText();
-        Assert.assertTrue(browser.clickElement(By.cssSelector(".news-block__buttons>.news-block__button.next")));
-        Assert.assertTrue(browser.waitUntilDisappear(By.xpath("//span[text()='"+titleOfFirstNews+"']"),5));
-        String newTitle = browser.getElement(By.cssSelector(".news-block__block .title")).getText();
+        String titleOfFirstNews = browser.getElement(newsBlockFirstTitle).getText();
+        Assert.assertTrue(browser.clickElement(newBlockNextButton));
+        Assert.assertTrue(browser.waitUntilDisappear(getElementByText(titleOfFirstNews),5));
+        String newTitle = browser.getElement(newsBlockFirstTitle).getText();
         Assert.assertFalse(titleOfFirstNews.equals(newTitle));
-        Assert.assertTrue(browser.clickElement(By.cssSelector(".news-block__buttons>.news-block__button.prev")));
-        Assert.assertTrue(browser.waitUntilExist(By.xpath("//span[text()='"+titleOfFirstNews+"']"),5));
+        Assert.assertTrue(browser.clickElement(newsBlockPrevButton));
+        Assert.assertTrue(browser.waitUntilExist(getElementByText(titleOfFirstNews),5));
     }
 
     @Test
     public void clickNextAndPreviousInVideoBlock(){
-        String linkOnVideo = browser.getElement(By.cssSelector("iframe[class^=video-block__youtube-container]")).getAttribute("src");
-        Assert.assertTrue(browser.clickElement(By.cssSelector(".video-block__buttons>.video-block__button.next")));
-        Assert.assertTrue(browser.waitUntilDisappear(By.xpath("//iframe[@src='"+linkOnVideo+"']"),5));
-        Assert.assertTrue(browser.waitUntilClickable(By.cssSelector(".video-block__buttons>.video-block__button.prev"),5));
-        Assert.assertTrue(browser.clickElement(By.cssSelector(".video-block__buttons>.video-block__button.prev")));
-        Assert.assertTrue(browser.waitUntilExist(By.xpath("//iframe[@src='"+linkOnVideo+"']"),5));
+        String linkOnVideo = browser.getElement(videoBlock).getAttribute("src");
+        Assert.assertTrue(browser.clickElement(videoBlockNextButton));
+        Assert.assertTrue(browser.waitUntilDisappear(iframeWithVideo(linkOnVideo),5));
+        Assert.assertTrue(browser.waitUntilClickable(videoBlockPrevButton,5));
+        Assert.assertTrue(browser.clickElement(videoBlockPrevButton));
+        Assert.assertTrue(browser.waitUntilExist(iframeWithVideo(linkOnVideo),5));
     }
 
     @Test
@@ -146,9 +165,9 @@ public class MainPageTest {
 
     @Test
     public void checkCookiePanelDisappearAfterClickOK(){
-        Assert.assertTrue(browser.isElementPresent(By.className("cookie-policy")));
-        Assert.assertTrue(browser.clickElement(By.className("cookie-ok")));
-        Assert.assertTrue(browser.waitUntilDisappear(By.className("cookie-policy"),5));
+        Assert.assertTrue(browser.isElementPresent(cookiePanel));
+        Assert.assertTrue(browser.clickElement(cookieOkButton));
+        Assert.assertTrue(browser.waitUntilDisappear(cookiePanel,5));
     }
 
     @Test
@@ -156,36 +175,33 @@ public class MainPageTest {
         browser.closeCockieIfExist();
         Assert.assertTrue(browser.getElementWithText("Лицензионное соглашение").isDisplayed());
         browser.getElementWithText("Лицензионное соглашение").click();
-        browser.waitUntilExist(By.xpath("//p"),5);
+        browser.waitUntilExist(textBlock,5);
         browser.waitForJQueryEnds();
         Assert.assertTrue(browser.getCurrentUrl().equals("http://tankionline.com/ru/eula/"));
-        Assert.assertTrue(browser.waitUntilClickable(By.id("fightActive"),5));
+        Assert.assertTrue(browser.waitUntilClickable(playButton,5));
         Assert.assertTrue(browser.getElementWithText("Лицензионное соглашение с Пользователем").isDisplayed());
-
     }
 
     @Test
     public void checkRules(){
         Assert.assertTrue(browser.getElementWithText("Правила игры").isDisplayed());
         browser.getElementWithText("Правила игры").click();
-        browser.waitUntilExist(By.xpath("//p"),5);
+        browser.waitUntilExist(textBlock,5);
         browser.waitForJQueryEnds();
         Assert.assertTrue(browser.getCurrentUrl().equals("http://tankionline.com/ru/rules/"));
-        Assert.assertTrue(browser.waitUntilClickable(By.id("fightActive"),5));
+        Assert.assertTrue(browser.waitUntilClickable(playButton,5));
         Assert.assertTrue(browser.getElementWithText("Правила игры").isDisplayed());
-
     }
 
     @Test
     public void checkPrivacy(){
         Assert.assertTrue(browser.getElementWithText("Политика конфиденциальности и cookies").isDisplayed());
         browser.getElementWithText("Политика конфиденциальности и cookies").click();
-        browser.waitUntilExist(By.xpath("//p"),5);
+        browser.waitUntilExist(textBlock,5);
         browser.waitForJQueryEnds();
         Assert.assertTrue(browser.getCurrentUrl().equals("http://tankionline.com/ru/privacy/"));
-        Assert.assertTrue(browser.waitUntilClickable(By.id("fightActive"),5));
+        Assert.assertTrue(browser.waitUntilClickable(playButton,5));
         Assert.assertTrue(browser.getElementWithText("Политика конфиденциальности и cookies").isDisplayed());
-
     }
 
 }
