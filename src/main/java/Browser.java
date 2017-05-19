@@ -1,8 +1,8 @@
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -16,6 +16,9 @@ public class Browser {
     private WebDriver webDriver;
     private int timeToWait = 3;
     private String mainPageUrl;
+    private RequestConfig config;
+    private CloseableHttpClient client;
+    private HttpGet request;
 
     public By mainLogo = By.cssSelector(".main-header__logo");
     public By playButton = By.id("fightActive");
@@ -47,6 +50,8 @@ public class Browser {
         webDriver = new ChromeDriver();
         webDriver.manage().timeouts().implicitlyWait(timeToWait, TimeUnit.SECONDS);
         webDriver.manage().window().maximize();
+        config = RequestConfig.custom().setCookieSpec(CookieSpecs.IGNORE_COOKIES).setSocketTimeout(5000).setConnectTimeout(5000).setConnectionRequestTimeout(5000).build();
+        client = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
     }
 
     public void waitForJQueryEnds() {
@@ -78,10 +83,11 @@ public class Browser {
     private boolean isLinkAlive(String URL) {
         HttpResponse response;
         try {
-            RequestConfig config = RequestConfig.custom().setCookieSpec(CookieSpecs.IGNORE_COOKIES).setSocketTimeout(15000).setConnectTimeout(10000).setConnectionRequestTimeout(10000).build();
-            HttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-            HttpGet request = new HttpGet(URL);
+            client = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+            request = new HttpGet(URL);
+            request.addHeader("User-Agent","Mozilla/5.0");
             response = client.execute(request);
+            client.close();
         } catch (Exception e) {
             System.err.println(URL + " error " + e.getLocalizedMessage());
             return false;
