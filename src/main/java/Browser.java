@@ -31,6 +31,7 @@ public class Browser {
     public By videoBlockNextButton = By.cssSelector(".video-block__buttons>.video-block__button.next");
     public By videoBlockPrevButton = By.cssSelector(".video-block__buttons>.video-block__button.prev");
     public By videoBlock = By.cssSelector("iframe[class^=video-block__youtube-container]");
+    private By topMenuPanel = By.className("top-line__nav");
 
     public By getElementByText(String title) {
         return By.xpath("//*[text()='"+title+"']");
@@ -38,6 +39,10 @@ public class Browser {
 
     public By iframeWithVideo(String linkOnVideo) {
         return By.xpath("//iframe[@src='"+linkOnVideo+"']");
+    }
+
+    public By getLinkWithText(String text) {
+        return By.xpath("//a[contains(.,'" + text + "')]");
     }
 
     public Browser(String mainPageUrl) {
@@ -112,13 +117,10 @@ public class Browser {
     }
 
     public boolean chooseTopLineElement(String name) {
-        if (!isElementPresent(By.className("top-line__nav"))) {
+        if (!isElementPresent(topMenuPanel)) {
             return false;
         }
-        if (!isElementPresent(By.xpath("//a[contains(.,'" + name + "')]"))) {
-            return false;
-        }
-        return clickElement(By.xpath("//a[contains(.,'" + name + "')]"));
+        return isElementPresent(getLinkWithText(name)) && clickElement(getLinkWithText(name));
     }
 
     protected boolean clickElement(By locator) {
@@ -207,6 +209,7 @@ public class Browser {
             waitForJQueryEnds();
         }
     }
+
 
     public boolean clickMainLogo() {
         return clickElement(mainLogo);
